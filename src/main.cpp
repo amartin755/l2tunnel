@@ -23,6 +23,7 @@ int main (int argc, char** argv)
 {
     try
     {
+#if 0
         RawSocket s = RawSocket::open ("lo");
             char buf[1024];
             ssize_t len;
@@ -32,7 +33,7 @@ int main (int argc, char** argv)
                 buf[len] = '\0';
                 std::cout << len << std::endl;
             }
-#if 0
+#else
         if (argc > 1)
         {
             TcpSocket connection = TcpSocket::connect (argv[1], 40000);

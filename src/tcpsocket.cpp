@@ -60,12 +60,29 @@ TcpSocket::TcpSocket (SOCKET s) : m_socket (s)
 {
 }
 
-void TcpSocket::close () const
+TcpSocket::TcpSocket (TcpSocket&& obj)
+{
+    m_socket = obj.m_socket;
+    obj.m_socket = INVALID_SOCKET;
+}
+
+TcpSocket::~TcpSocket ()
+{
+    if (m_socket != INVALID_SOCKET)
+    {
+        // we directly call close becaus TcpSocket::close might throw an exception
+        ::close (m_socket);
+        m_socket = INVALID_SOCKET;
+    }
+}
+
+void TcpSocket::close ()
 {
     if (::close (m_socket))
     {
         throw SocketException();
     }
+    m_socket = INVALID_SOCKET;
 }
 
 TcpSocket TcpSocket::connect (const std::string& host, uint16_t remotePort, bool ipv4, bool ipv6)
@@ -93,16 +110,16 @@ TcpSocket TcpSocket::connect (const std::string& host, uint16_t remotePort, bool
 
 TcpSocket TcpSocket::listen (uint16_t port, int backlog, bool ipv4, bool ipv6)
 {
-    SOCKET s = socket (ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0);
-    if (s == INVALID_SOCKET)
+    TcpSocket s (socket (ipv6 ? AF_INET6 : AF_INET, SOCK_STREAM, 0));
+    if (!s.isValid())
         throw SocketException();
 
     const int enable = 1;
-    if (::setsockopt (s, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)))
+    if (::setsockopt (s.m_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)))
         throw SocketException ();
 
     const int ipv6only = !ipv4 && ipv6;
-    if (::setsockopt (s, IPPROTO_IPV6, IPV6_V6ONLY, &ipv6only, sizeof(ipv6only)))
+    if (::setsockopt (s.m_socket, IPPROTO_IPV6, IPV6_V6ONLY, &ipv6only, sizeof(ipv6only)))
         throw SocketException ();
 
     struct sockaddr_storage address;
@@ -122,13 +139,13 @@ TcpSocket TcpSocket::listen (uint16_t port, int backlog, bool ipv4, bool ipv6)
         addr6->sin6_port   = htons (port);
     }
 
-    if (::bind (s, (struct sockaddr *) &address, sizeof (address)))
+    if (::bind (s.m_socket, (struct sockaddr *) &address, sizeof (address)))
         throw SocketException ();
 
-    if (::listen (s, backlog))
+    if (::listen (s.m_socket, backlog))
         throw SocketException ();
 
-    return TcpSocket(s);
+    return s;
 }
 
 TcpSocket TcpSocket::accept (std::string& addr, uint16_t& port) const

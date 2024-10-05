@@ -35,10 +35,16 @@ class TcpSocket
 {
 public:
     TcpSocket () = delete;
+    TcpSocket (const TcpSocket&) = delete;
+    TcpSocket& operator=(const TcpSocket&) = delete;
+    TcpSocket& operator=(const TcpSocket&&) = delete;
+    
+    TcpSocket (TcpSocket&& obj);
+    ~TcpSocket ();
 
     static TcpSocket connect (const std::string& host, uint16_t remotePort, bool ipv4 = true, bool ipv6 = true);
     static TcpSocket listen (uint16_t port, int backlog, bool ipv4 = true, bool ipv6 = true);
-    void close () const;
+    void close ();
 
     TcpSocket accept (std::string& addr, uint16_t& port) const;
     ssize_t recv (void *buf, size_t len) const;
@@ -48,6 +54,11 @@ public:
     std::string getsockname () const;
     // get remote address and port of socket
     std::string getpeername () const;
+
+    bool isValid () const
+    {
+        return m_socket != INVALID_SOCKET;
+    }
 
 private:
     TcpSocket (SOCKET s);

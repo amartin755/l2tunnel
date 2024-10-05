@@ -28,20 +28,33 @@
 
 #if USE_PCAP
     typedef pcap_t* RAW_SOCKET;
+    #define INVALID_RAWSOCKET (nullptr)
 #else
     typedef int RAW_SOCKET;
+    #define INVALID_RAWSOCKET (-1)
 #endif
 
 class RawSocket
 {
 public:
     RawSocket () = delete;
+    RawSocket (const RawSocket&) = delete;
+    RawSocket& operator=(const RawSocket&) = delete;
+    RawSocket& operator=(const RawSocket&&) = delete;
+    
+    RawSocket (RawSocket&& obj);
+    ~RawSocket ();
 
     static RawSocket open (const std::string& interface);
-    void close () const;
+    void close ();
 
     ssize_t recv (void *buf, size_t len) const;
     ssize_t send (const void *buf, size_t len) const;
+
+    bool isValid () const
+    {
+        return m_socket != INVALID_RAWSOCKET;
+    }
 
 private:
     RawSocket (RAW_SOCKET s);

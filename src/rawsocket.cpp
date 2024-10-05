@@ -33,14 +33,30 @@ RawSocket::RawSocket (RAW_SOCKET s) : m_socket (s)
 {
 }
 
+RawSocket::RawSocket (RawSocket&& obj)
+{
+    m_socket = obj.m_socket;
+    obj.m_socket = INVALID_RAWSOCKET;
+}
+
+RawSocket::~RawSocket ()
+{
+    if (m_socket != INVALID_RAWSOCKET)
+    {
+        // we directly call close becaus RawSocket::close might throw an exception
+        ::close (m_socket);
+        m_socket = INVALID_RAWSOCKET;
+    }
+}
+
 RawSocket RawSocket::open (const std::string& interface)
 {
-    RAW_SOCKET s = socket (PF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    if (s < 0)
-        throw SocketException();
-
     int ifIndex = if_nametoindex (interface.c_str ());
     if (!ifIndex)
+        throw SocketException();
+
+    RawSocket s (socket (PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)));
+    if (!s.isValid())
         throw SocketException();
 
     struct sockaddr_ll sll;
@@ -49,18 +65,19 @@ RawSocket RawSocket::open (const std::string& interface)
     sll.sll_protocol = htons(ETH_P_ALL);
     sll.sll_ifindex = ifIndex;
     
-    if (bind(s, (struct sockaddr *)&sll, sizeof(sll)) < 0)
+    if (bind(s.m_socket, (struct sockaddr *)&sll, sizeof(sll)) < 0)
         throw SocketException();
 
-    return RawSocket (s);
+    return s;
 }
 
-void RawSocket::close () const
+void RawSocket::close ()
 {
     if (::close (m_socket))
     {
         throw SocketException();
     }
+    m_socket = INVALID_RAWSOCKET;
 }
 
 ssize_t RawSocket::recv (void *buf, size_t len) const
