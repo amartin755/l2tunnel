@@ -96,11 +96,11 @@ set (SOURCES
     ${SOURCE_DIR}/rawsocket.cpp
     ${SOURCE_DIR}/socketexception.cpp
 )
-#add_subdirectory(libcmdline)
+add_subdirectory(libcmdline)
 
 target_sources (l2tun PRIVATE ${SOURCES})
 #target_include_directories (l2tun
 #    PRIVATE libcmdline/lib)
 #target_link_libraries (l2tun PUBLIC pthread)
-#target_link_libraries (l2tun PRIVATE cmdline)
+target_link_libraries (l2tun PRIVATE cmdline)
 
