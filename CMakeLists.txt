@@ -95,6 +95,7 @@ set (SOURCES
     ${SOURCE_DIR}/tcpsocket.cpp
     ${SOURCE_DIR}/rawsocket.cpp
     ${SOURCE_DIR}/socketexception.cpp
+    ${SOURCE_DIR}/receiver.cpp
 )
 add_subdirectory(libcmdline)
 

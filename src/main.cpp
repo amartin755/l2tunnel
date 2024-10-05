@@ -20,6 +20,7 @@
 #include "main.hpp"
 #include "tcpsocket.hpp"
 #include "rawsocket.hpp"
+#include "receiver.hpp"
 
 
 Application::Application(const char* name, const char* brief, const char* usage, const char* description, const char* version,
@@ -58,7 +59,7 @@ int Application::execute (const std::list<std::string>& args)
 
         if (isServer)
         {
-            TcpSocket server = TcpSocket::listen (40000, 0);
+            TcpSocket server = TcpSocket::listen (m_options.serverPort, 1);
 
             std::string addr;
             uint16_t port;
@@ -89,6 +90,11 @@ int Application::execute (const std::list<std::string>& args)
             }
 
             TcpSocket connection = TcpSocket::connect (args.front(), port);
+            Receiver receiverThread (&s, &connection);
+            while (1)
+            {
+                sleep (1);
+            }
         }
     }
     catch (const SocketException& e)
