@@ -41,15 +41,15 @@ public:
     RawSocket (const RawSocket&) = delete;
     RawSocket& operator=(const RawSocket&) = delete;
     RawSocket& operator=(const RawSocket&&) = delete;
-    
+
     RawSocket (RawSocket&& obj);
     ~RawSocket ();
 
     static RawSocket open (const std::string& interface);
     void close ();
 
-    ssize_t recv (void *buf, size_t len) const;
-    ssize_t send (const void *buf, size_t len) const;
+    size_t recv (void *buf, size_t len) const;
+    size_t send (const void *buf, size_t len) const;
 
     bool isValid () const
     {

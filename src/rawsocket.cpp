@@ -64,7 +64,7 @@ RawSocket RawSocket::open (const std::string& interface)
     sll.sll_family = AF_PACKET;
     sll.sll_protocol = htons(ETH_P_ALL);
     sll.sll_ifindex = ifIndex;
-    
+
     if (bind(s.m_socket, (struct sockaddr *)&sll, sizeof(sll)) < 0)
         throw SocketException();
 
@@ -80,20 +80,20 @@ void RawSocket::close ()
     m_socket = INVALID_RAWSOCKET;
 }
 
-ssize_t RawSocket::recv (void *buf, size_t len) const
+size_t RawSocket::recv (void *buf, size_t len) const
 {
     auto ret = ::recv (m_socket, buf, len, 0); // auto because on windows the return value is int
     if (ret < 0)
         throw SocketException ();
 
-    return (ssize_t)ret;
+    return (size_t)ret;
 }
 
-ssize_t RawSocket::send (const void *buf, size_t len) const
+size_t RawSocket::send (const void *buf, size_t len) const
 {
     auto ret = ::send (m_socket, buf, len, 0); // auto because on windows the return value is int
     if (ret < 0)
         throw SocketException ();
 
-    return (ssize_t)ret;
+    return (size_t)ret;
 }

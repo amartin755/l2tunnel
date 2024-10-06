@@ -164,22 +164,22 @@ TcpSocket TcpSocket::accept (std::string& addr, uint16_t& port) const
     return TcpSocket (ret);
 }
 
-ssize_t TcpSocket::recv (void *buf, size_t len) const
+size_t TcpSocket::recv (void *buf, size_t len) const
 {
     auto ret = ::recv (m_socket, buf, len, 0); // auto because on windows the return value is int
     if (ret < 0)
         throw SocketException ();
 
-    return (ssize_t)ret;
+    return (size_t)ret;
 }
 
-ssize_t TcpSocket::send (const void *buf, size_t len) const
+size_t TcpSocket::send (const void *buf, size_t len) const
 {
     auto ret = ::send (m_socket, buf, len, 0); // auto because on windows the return value is int
     if (ret < 0)
         throw SocketException ();
 
-    return (ssize_t)ret;
+    return (size_t)ret;
 }
 
 std::string TcpSocket::getsockname () const
@@ -243,8 +243,8 @@ void getaddrinfo (const std::string& node, uint16_t remotePort,
     hints.ai_protocol = protocol;
     result.clear ();
 
-    int s = ::getaddrinfo (node.c_str (), 
-        sockType != SOCK_RAW ? std::to_string(remotePort).c_str() : NULL, 
+    int s = ::getaddrinfo (node.c_str (),
+        sockType != SOCK_RAW ? std::to_string(remotePort).c_str() : NULL,
         &hints, &res);
     if (s != 0)
     {

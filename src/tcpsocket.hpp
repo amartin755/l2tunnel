@@ -38,7 +38,7 @@ public:
     TcpSocket (const TcpSocket&) = delete;
     TcpSocket& operator=(const TcpSocket&) = delete;
     TcpSocket& operator=(const TcpSocket&&) = delete;
-    
+
     TcpSocket (TcpSocket&& obj);
     ~TcpSocket ();
 
@@ -47,8 +47,8 @@ public:
     void close ();
 
     TcpSocket accept (std::string& addr, uint16_t& port) const;
-    ssize_t recv (void *buf, size_t len) const;
-    ssize_t send (const void *buf, size_t len) const;
+    size_t recv (void *buf, size_t len) const;
+    size_t send (const void *buf, size_t len) const;
 
     // get local address and port of socket
     std::string getsockname () const;
