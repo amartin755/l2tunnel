@@ -47,18 +47,40 @@ enum Type : uint16_t {
 
 struct TunnelHeader
 {
-    Type type;
-    uint16_t res;
-    uint32_t len;
-
     static void* packet (uint8_t* buf, uint32_t payloadLength)
     {
         TunnelHeader* h = (TunnelHeader*)buf;
-        h->res = 0;
-        h->type = (Type)swap16 (Type::PACKET);
-        h->len  = swap32 (payloadLength);
+        h->m_res = 0;
+        h->setType (Type::PACKET);
+        h->setLength (payloadLength);
         return buf;
     }
+
+    Type getType () const
+    {
+        return (Type)swap16 (m_type);
+    }
+    void setType (Type t)
+    {
+        m_type = (Type)swap16 (t);
+    }
+    uint32_t getLength () const
+    {
+        return swap32 (m_len);
+    }
+    void setLength (uint32_t len)
+    {
+        m_len = swap32 (len);
+    }
+    bool isPacket () const
+    {
+        return getType() == Type::PACKET;
+    }
+
+private:
+    Type m_type;
+    uint16_t m_res;
+    uint32_t m_len;
 };
 
 // ensure packet struct without using compiler specific packing attributes/pragmas
