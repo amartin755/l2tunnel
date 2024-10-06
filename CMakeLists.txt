@@ -23,9 +23,11 @@ add_compile_options (-Wall -Wextra -Wpedantic -fstack-protector-all)
 # check dependencies
 ###############################################################################
 include (CheckSymbolExists)
+include (TestBigEndian)
 check_symbol_exists (inet_pton "arpa/inet.h" HAVE_PTON)
 check_symbol_exists (inet_ntop "arpa/inet.h" HAVE_NTOP)
 check_symbol_exists (strerrordesc_np "string.h" HAVE_STRERRORDESC_NP)
+test_big_endian (HAVE_BIG_ENDIAN)
 
 # preprocessor definitions
 ###############################################################################
@@ -42,6 +44,10 @@ endif ()
 if (WIN32)
     add_compile_definitions (HAVE_WINDOWS)
 endif ()
+if (HAVE_BIG_ENDIAN)
+    add_compile_definitions (HAVE_BIG_ENDIAN)
+endif ()
+
 
 # generate build numbers
 ###############################################################################

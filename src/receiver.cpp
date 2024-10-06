@@ -16,13 +16,17 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <memory>
+
 #include "receiver.hpp"
 #include "tcpsocket.hpp"
 #include "rawsocket.hpp"
 #include "console.hpp"
+#include "tunnel.hpp"
 
-Receiver::Receiver (const RawSocket* inputSocket, const TcpSocket* outputSocket)
-: m_thread (&Receiver::threadFunc, this, inputSocket, outputSocket)
+
+Receiver::Receiver (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket)
+: m_thread (&Receiver::threadFunc, this, mtu, inputSocket, outputSocket)
 {
 
 }
@@ -32,20 +36,19 @@ Receiver::~Receiver ()
     m_thread.join ();
 }
 
-void Receiver::threadFunc (const RawSocket* inputSocket, const TcpSocket* outputSocket)
+void Receiver::threadFunc (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket)
 {
     try
     {
-        struct {
-            uint32_t type;
-            uint32_t len;
-            uint8_t  data[1024];
-        }packet;
+        const size_t headerLen = sizeof (TunnelHeader);
+        std::unique_ptr<uint8_t[]> data (new uint8_t[headerLen + mtu]);
+        ssize_t payloadLen;
 
-        while ((packet.len = inputSocket->recv (packet.data, sizeof (packet.data))) > 0)
+        while ((payloadLen = inputSocket->recv (data.get() + headerLen, mtu)) > 0)
         {
-            packet.type = 0x12345678;
-            outputSocket->send (&packet, packet.len + sizeof (packet.type) + sizeof (packet.len));
+            outputSocket->send (
+                TunnelHeader::packet(data.get(), (uint32_t) payloadLen),
+                headerLen + payloadLen);
         }
     }
     catch(const SocketException& e)

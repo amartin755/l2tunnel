@@ -28,10 +28,10 @@ class TcpSocket;
 class Receiver
 {
 public:
-    Receiver (const RawSocket* inputSocket, const TcpSocket* outputSocket);
+    Receiver (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket);
     ~Receiver ();
 
-    void threadFunc (const RawSocket* inputSocket, const TcpSocket* outputSocket);
+    void threadFunc (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket);
 
 private:
     std::thread m_thread;

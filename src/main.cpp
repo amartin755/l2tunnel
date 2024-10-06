@@ -90,7 +90,7 @@ int Application::execute (const std::list<std::string>& args)
             }
 
             TcpSocket connection = TcpSocket::connect (args.front(), port);
-            Receiver receiverThread (&s, &connection);
+            Receiver receiverThread (1500, &s, &connection);
             while (1)
             {
                 sleep (1);
