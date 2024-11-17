@@ -14,8 +14,8 @@ set (CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/../bin)
 
 # compiler settings
 ###############################################################################
-# C++11 is required
-set(CMAKE_CXX_STANDARD 11)
+# C++20 is required (because of std::counting_semaphore)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # warning level
 add_compile_options (-Wall -Wextra -Wpedantic -fstack-protector-all)
@@ -28,6 +28,7 @@ check_symbol_exists (inet_pton "arpa/inet.h" HAVE_PTON)
 check_symbol_exists (inet_ntop "arpa/inet.h" HAVE_NTOP)
 check_symbol_exists (strerrordesc_np "string.h" HAVE_STRERRORDESC_NP)
 test_big_endian (HAVE_BIG_ENDIAN)
+check_symbol_exists (eventfd "sys/eventfd.h" HAVE_EVENTFD)
 
 # preprocessor definitions
 ###############################################################################
@@ -46,6 +47,9 @@ if (WIN32)
 endif ()
 if (HAVE_BIG_ENDIAN)
     add_compile_definitions (HAVE_BIG_ENDIAN)
+endif ()
+if (HAVE_EVENTFD)
+    add_compile_definitions (HAVE_EVENTFD)
 endif ()
 
 
@@ -102,6 +106,8 @@ set (SOURCES
     ${SOURCE_DIR}/rawsocket.cpp
     ${SOURCE_DIR}/socketexception.cpp
     ${SOURCE_DIR}/receiver.cpp
+    ${SOURCE_DIR}/sender.cpp
+    ${SOURCE_DIR}/socketevent.cpp
 )
 add_subdirectory(libcmdline)
 

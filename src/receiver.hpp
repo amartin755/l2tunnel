@@ -28,10 +28,14 @@ class TcpSocket;
 class Receiver
 {
 public:
-    Receiver (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket);
+    Receiver (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket, std::binary_semaphore* finished = nullptr);
     ~Receiver ();
+    void join ()
+    {
+        m_thread.join ();
+    }
 
-    void threadFunc (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket);
+    void threadFunc (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket, std::binary_semaphore* finished);
 
 private:
     std::thread m_thread;

@@ -21,6 +21,7 @@
 #include "tcpsocket.hpp"
 #include "rawsocket.hpp"
 #include "receiver.hpp"
+#include "sender.hpp"
 
 
 Application::Application(const char* name, const char* brief, const char* usage, const char* description, const char* version,
@@ -64,9 +65,15 @@ int Application::execute (const std::list<std::string>& args)
             std::string addr;
             uint16_t port;
 
-            TcpSocket connection = server.accept (addr, port);
+            TcpSocket tcpConnection = server.accept (addr, port);
             std::cout << addr << ":" << port << std::endl;
 
+            Receiver receiverThread (1500, &s, &tcpConnection);
+            Sender senderThread (1500, &s, &tcpConnection);
+            while (1)
+            {
+                sleep (1);
+            }
         }
         else
         {
@@ -88,13 +95,22 @@ int Application::execute (const std::list<std::string>& args)
                 Console::PrintError ("Invalid port numer '%s'.\n", args.back().c_str());
                 return -1;
             }
+std::binary_semaphore sem(0);
+            TcpSocket tcpConnection = TcpSocket::connect (args.front(), port);
+            Receiver receiverThread (1500, &s, &tcpConnection, &sem);
+            Sender senderThread (1500, &s, &tcpConnection, &sem);
 
-            TcpSocket connection = TcpSocket::connect (args.front(), port);
-            Receiver receiverThread (1500, &s, &connection);
-            while (1)
-            {
-                sleep (1);
-            }
+            sem.acquire();
+            Console::PrintDebug ("sender or receiver terminated\n");
+            tcpConnection.cancel ();
+            s.cancel ();
+//            receiverThread.join ();
+//            senderThread.join ();
+
+            // TODO
+            // - wait until at least one thread terminates (semaphore?)
+            // - close all socket
+            // - join both threads
         }
     }
     catch (const SocketException& e)

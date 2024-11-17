@@ -85,6 +85,11 @@ void TcpSocket::close ()
     m_socket = INVALID_SOCKET;
 }
 
+void TcpSocket::cancel () const
+{
+    m_event.cancel ();
+}
+
 TcpSocket TcpSocket::connect (const std::string& host, uint16_t remotePort, bool ipv4, bool ipv6)
 {
     std::list <struct info> r;
@@ -166,8 +171,12 @@ TcpSocket TcpSocket::accept (std::string& addr, uint16_t& port) const
 
 size_t TcpSocket::recv (void *buf, size_t len) const
 {
+    if (!m_event.waitRecv (m_socket))
+        return 0; // if no timeout is provided, this must not happen
+
     auto ret = ::recv (m_socket, buf, len, 0); // auto because on windows the return value is int
-    if (ret < 0)
+
+    if (ret <= 0)
         throw SocketException ();
 
     return (size_t)ret;
@@ -176,7 +185,7 @@ size_t TcpSocket::recv (void *buf, size_t len) const
 size_t TcpSocket::send (const void *buf, size_t len) const
 {
     auto ret = ::send (m_socket, buf, len, 0); // auto because on windows the return value is int
-    if (ret < 0)
+    if (ret <= 0)
         throw SocketException ();
 
     return (size_t)ret;

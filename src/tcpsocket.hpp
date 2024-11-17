@@ -24,12 +24,9 @@
 #include <cstdint>
 
 #include "socketexception.hpp"
+#include "sockettype.h"
+#include "socketevent.hpp"
 
-
-#if !HAVE_WINDOWS
-    typedef int SOCKET;
-    #define INVALID_SOCKET (-1)
-#endif
 
 class TcpSocket
 {
@@ -60,10 +57,13 @@ public:
         return m_socket != INVALID_SOCKET;
     }
 
+    void cancel () const;
+
 private:
     TcpSocket (SOCKET s);
 
     SOCKET m_socket;
+    SocketEvent m_event;
 };
 
 #endif

@@ -16,32 +16,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef SOCKETTYPE_HPP
+#define SOCKETTYPE_HPP
 
-#ifndef SENDER_HPP
-#define SENDER_HPP
-
-#include <thread>
-#include <semaphore>
-
-class RawSocket;
-class TcpSocket;
-
-class Sender
-{
-public:
-    Sender (unsigned mtu, const RawSocket* outputSocket, const TcpSocket* inputSocket, std::binary_semaphore* finished = nullptr);
-    ~Sender ();
-    void join ()
-    {
-        m_thread.join ();
-    }
-
-    void threadFunc (unsigned mtu, const RawSocket* outputSocket, const TcpSocket* inputSocket, std::binary_semaphore* finished);
-
-private:
-    std::thread m_thread;
-};
-
-
+#if !HAVE_WINDOWS
+    typedef int SOCKET;
+    #define INVALID_SOCKET (-1)
+#endif
 
 #endif

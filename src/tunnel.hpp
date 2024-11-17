@@ -20,6 +20,7 @@
 #define TUNNEL_HPP
 
 #include <cstdint>
+#include "bug.hpp"
 
 static inline uint32_t swap32 (uint32_t val)
 {
@@ -75,6 +76,17 @@ struct TunnelHeader
     bool isPacket () const
     {
         return getType() == Type::PACKET;
+    }
+
+    const TunnelHeader* next () const
+    {
+        return (TunnelHeader*)((uint8_t*)this + sizeof (TunnelHeader) + getLength());
+    }
+
+    const uint8_t* payload () const
+    {
+        BUG_ON (getLength() == 0);
+        return (uint8_t*)this + sizeof (TunnelHeader);
     }
 
 private:

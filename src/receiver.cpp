@@ -25,8 +25,8 @@
 #include "tunnel.hpp"
 
 
-Receiver::Receiver (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket)
-: m_thread (&Receiver::threadFunc, this, mtu, inputSocket, outputSocket)
+Receiver::Receiver (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket, std::binary_semaphore* finished)
+: m_thread (&Receiver::threadFunc, this, mtu, inputSocket, outputSocket, finished)
 {
 
 }
@@ -36,8 +36,9 @@ Receiver::~Receiver ()
     m_thread.join ();
 }
 
-void Receiver::threadFunc (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket)
+void Receiver::threadFunc (unsigned mtu, const RawSocket* inputSocket, const TcpSocket* outputSocket, std::binary_semaphore* finished)
 {
+    Console::PrintDebug ("Receiver started\n");
     try
     {
         const size_t headerLen = sizeof (TunnelHeader);
@@ -53,6 +54,11 @@ void Receiver::threadFunc (unsigned mtu, const RawSocket* inputSocket, const Tcp
     }
     catch(const SocketException& e)
     {
-        Console::PrintError ("%s", e.what());
+        Console::PrintError ("%s\n", e.what());
     }
+
+    Console::PrintDebug ("Receiver terminated\n");
+
+    if (finished)
+        finished->release ();
 }

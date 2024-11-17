@@ -24,6 +24,8 @@
 #include <cstdint>
 
 #include "socketexception.hpp"
+#include "sockettype.h"
+#include "socketevent.hpp"
 
 
 #if USE_PCAP
@@ -56,10 +58,13 @@ public:
         return m_socket != INVALID_RAWSOCKET;
     }
 
+    void cancel () const;
+
 private:
     RawSocket (RAW_SOCKET s);
 
     RAW_SOCKET m_socket;
+    SocketEvent m_event;
 };
 
 #endif
